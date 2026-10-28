@@ -1,14 +1,22 @@
-import express from 'express';
+require('dotenv').config();
 
-const app = express();
-const port = 3000;
+const app = require('./src/app');
 
-app.use(express.json());
+const {
+    connectRabbitMQ,
+} = require('./src/config/rabbitmq');
 
-app.get('/', (_req, res) => {
-  res.json({ message: 'Hello from TypeScript Express!' });
-});
+const PORT = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+async function startServer() {
+    await connectRabbitMQ();
+
+    app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
+    });
+}
+
+startServer().catch((error) => {
+    console.error('Application startup failed:', error);
+    process.exit(1);
 });
